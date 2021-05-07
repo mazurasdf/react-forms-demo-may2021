@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 
 const SmallForm = (props) => {
+    //rather than multiple states, we have one state that holds an object with all inputs
     const [form, setForm] = useState({
         firstName: "",
         lastName: "",
@@ -10,6 +11,7 @@ const SmallForm = (props) => {
         phone: ""
     });
 
+    //this approach allows us to use the same function for input onChange
     const onChangeHandler = (event) => {
         setForm({
             ...form,
@@ -17,49 +19,71 @@ const SmallForm = (props) => {
         })
     }
 
-    const nameValid = (str) => {
-        return str.length >= 3;
+    //validator functions can be reused for different components
+    const lengthValidator = (str, length) => {
+        return str.length >= length;
     }
 
-    const phoneValid = (str) => {
-        return str.length === 7;
+    //or they can have more specific uses for single inputs
+    const dateValid = (date) => {
+        return new Date(date) >= new Date();
     }
 
+    //regex is always useful for validations
+    const emailValid = (str) => {
+        return /^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$/.test(str);
+    }
+
+    //returns true only when every input is valid
     const allValid = (allInputs) => {
-        return nameValid(allInputs.firstName) && nameValid(allInputs.lastName) && phoneValid(allInputs.phone);
+        return lengthValidator(allInputs.firstName,3)
+            && lengthValidator(allInputs.lastName,3)
+            && lengthValidator(allInputs.phone,7)
+            && dateValid(allInputs.reservation)
+            && emailValid(allInputs.email)
+    }
+
+    //this function will print our inputs to the console
+    const onSubmitHandler = (event) => {
+        event.preventDefault();//we'll talk about this line soon!
+        console.log("form submitted!");
+        console.log(form);
     }
 
     return(
         <div>
-            <form>
+            <marquee><h1>Make a reservation at the Food Restaurant™</h1></marquee>
+            <form onSubmit={onSubmitHandler}>
                 <div className="form-row">
                     <div className="form-group col-md-6 mx-auto center mb-3">
-                        <label for="firstName">First Name</label>
-                        <input type="email" onChange={onChangeHandler} className="form-control" name="firstName"/>
-                        {!nameValid(form.firstName) && form.firstName.length != 0 && <span className="alert-danger">must be at least 3 characters</span>}
+                        <label htmlFor="firstName">First Name</label>
+                        <input type="text" onChange={onChangeHandler} className="form-control" name="firstName"/>
+                        {!lengthValidator(form.firstName,3) && form.firstName.length !== 0 && <span className="alert-danger">must be at least 3 characters</span>}
                     </div>
                     <div className="form-group col-md-6 mx-auto center m-3">
-                        <label for="lastName">Last Name</label>
+                        <label htmlFor="lastName">Last Name</label>
                         <input type="text" onChange={onChangeHandler} className="form-control" name="lastName"/>
-                        {!nameValid(form.lastName) && form.lastName.length != 0 && <span className="alert-danger">must be at least 3 characters</span>}
+                        {!lengthValidator(form.lastName,3) && form.lastName.length !== 0 && <span className="alert-danger">must be at least 3 characters</span>}
                     </div>
                 </div>
                 <div className="form-group col-md-6 mx-auto center m-3">
-                    <label for="reservation">Reservation date and time</label>
+                    <label htmlFor="reservation">Reservation date and time</label>
                     <input type="datetime-local" onChange={onChangeHandler} className="form-control" name="reservation"/>
+                    {!dateValid(form.reservation) && form.reservation.length !== 0 && <span className="alert-danger">no past dates</span>}
                 </div>
                 <div className="form-group col-md-6 mx-auto center m-3">
-                    <label for="email">Email</label>
-                    <input type="text" onChange={onChangeHandler} className="form-control" name="email"/>
+                    <label htmlFor="email">Email</label>
+                    <input type="email" onChange={onChangeHandler} className="form-control" name="email"/>
+                    {!emailValid(form.email) && form.email.length !== 0 && <span className="alert-danger">must enter valid email</span>}
                 </div>
                 <div className="form-group col-md-6 mx-auto center m-3">
-                    <label for="confirmEmail">Confirm email</label>
-                    <input type="text" onChange={onChangeHandler} className="form-control" name="confirmEmail"/>
+                    <label htmlFor="confirmEmail">Confirm email</label>
+                    <input type="email" onChange={onChangeHandler} className="form-control" name="confirmEmail"/>
                 </div>
                 <div className="form-group col-md-6 mx-auto center m-3">
-                    <label for="phone">Phone number</label>
+                    <label htmlFor="phone">Phone number</label>
                     <input type="text" onChange={onChangeHandler} className="form-control" name="phone"/>
-                    {!phoneValid(form.phone) && form.phone.length != 0 && <span className="alert-danger">7 digits!!!</span>}
+                    {!lengthValidator(form.phone,7) && form.phone.length !== 0 && <span className="alert-danger">7 digits!!!</span>}
                 </div>
                 {
                     allValid(form) ?
